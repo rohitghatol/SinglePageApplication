@@ -1,0 +1,39 @@
+@import "rounded";
+
+$color1:green;
+$color2:red;
+$color3:yellow;
+
+$std-width:10px;
+
+.todos{
+    padding:$std-width - 10;
+    margin:10px;
+    border:1px solid $color1;
+    @include rounded(5px);
+    background:$color3;
+
+  .tab{
+    padding:10px;
+
+    border:1px solid black;
+    border-radius: 10px 10px 0px 0px;
+    background:#777777;
+    color:white;
+  }
+  .aboutus{
+    padding:10px;
+    p{
+      font-size: 20pt;
+    }
+  }
+  .todo{
+    padding:$std-width;
+    margin:10px;
+    border:1px solid $color1;
+
+    @include rounded(3px);
+
+    background:$color2;
+  }
+}

@@ -1,0 +1,26 @@
+.todos {
+  padding: 0px;
+  margin: 10px;
+  border: 1px solid green;
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  background: yellow; }
+  .todos .tab {
+    padding: 10px;
+    border: 1px solid black;
+    border-radius: 10px 10px 0px 0px;
+    background: #777777;
+    color: white; }
+  .todos .aboutus {
+    padding: 10px; }
+    .todos .aboutus p {
+      font-size: 20pt; }
+  .todos .todo {
+    padding: 10px;
+    margin: 10px;
+    border: 1px solid green;
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    background: red; }
