@@ -1,10 +1,11 @@
 /**
  * Created with JetBrains WebStorm.
  * User: rohit
- * Date: 7/19/12
- * Time: 3:49 PM
+ * Date: 7/20/12
+ * Time: 7:56 PM
  * To change this template use File | Settings | File Templates.
  */
+
 
 require.config({
     paths:{
@@ -13,8 +14,10 @@ require.config({
         backbone:'libs/backbone/backbone-optamd3-min',
         text:'libs/require/text'
     }
-})
+});
 
 require(['views/app'],function(AppView){
-   var appView = new AppView;
+
+    var appView = new AppView;
+
 });

@@ -1,26 +1,27 @@
-({
-    appDir: "../",
-    baseUrl: "js/",
-    dir: "../../BackboneJs-Opt",
-    //Comment out the optimize line if you want
-    //the code minified by UglifyJS
-    //optimize: "none",
+/**
+ * Created with JetBrains WebStorm.
+ * User: rohit
+ * Date: 7/20/12
+ * Time: 9:15 PM
+ * To change this template use File | Settings | File Templates.
+ */
 
-    paths: {
+({
+    appDir:"../",
+    baseUrl:"js/",
+    dir:"../../Backbone-Demo-Opt",
+
+    paths:{
+
         'jquery':'libs/jquery/jquery-min',
         'underscore':'libs/underscore/underscore-min',
         'backbone':'libs/backbone/backbone-optamd3-min',
         'text':'libs/require/text'
     },
 
-    modules: [
-        //Optimize the application files. jQuery is not 
-        //included since it is already in require-jquery.js
+    modules:[
         {
-            name: "main"
+            name:"main"
         }
     ]
 })
-
-
-// Run Command line - node ../../requirejs/r.js -o app.build.js
