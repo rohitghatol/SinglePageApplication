@@ -1,0 +1,10 @@
+.todos {
+  background: green; }
+  .todos .todo {
+    padding: 10px;
+    margin: 10px;
+    border: 1px solid blue;
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    background: red; }

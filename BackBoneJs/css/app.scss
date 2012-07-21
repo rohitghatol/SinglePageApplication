@@ -1,0 +1,20 @@
+@import "rounded";
+
+$app-color: green;
+$main-color: red;
+$border-color: blue;
+$std-padding:20px;
+
+.todos{
+    background:$app-color;
+
+    .todo{
+        padding:10px;
+        margin:$std-padding/2;
+
+        border:1px solid $border-color;
+        @include rounded(5px);
+        background:$main-color;
+    }
+
+}
