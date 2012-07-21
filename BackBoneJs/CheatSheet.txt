@@ -1,0 +1,625 @@
+========================================================================================================================
+1. Index.html
+
+<title>Todo App</title>
+<script type="text/javascript" src="js/libs/require/require.js" data-main="js/main"></script>
+<link rel="stylesheet" href="css/app.css"/>
+========================================================================================================================
+2. RequireJs Demo
+
+//module2.js
+define(function(){
+   console.log("Module 2 Loaded");
+   var Module2 = {
+        name:"Module2"
+   };
+   return Module2;
+});
+
+//module1.js
+define(['module2'],function(Module2){
+    console.log("Module 1 Loaded");
+    console.log("Value of Module 2 = "+Module2.name);
+    var Module1 = {
+        name:"Module1"
+    };
+    return Module2;
+});
+
+//main.js
+require(['module1'],function(Module1){
+   console.log("Value of Module 1 = "+Module1.name);
+   console.log("Main Loaded");
+});
+
+========================================================================================================================
+
+3. Backbone View and Model Demo
+
+//index.html
+<h1>Todo App</h1>
+<div id="placeholder" class="todos">....</div>
+
+//main.js
+require.config({
+    paths:{
+        jquery:'libs/jquery/jquery-min',
+        underscore:'libs/underscore/underscore-min',
+        backbone:'libs/backbone/backbone-optamd3-min',
+        text:'libs/require/text'
+    }
+});
+
+require(['views/app'],function(AppView){
+    console.log("Main Loaded");
+    var appView = new AppView();
+});
+
+//views/app.js
+define(['backbone'],function(Backbone){
+      var AppView = Backbone.View.extend({
+          initialize:function(){
+              console.log("App View Initialized");
+          }
+      })
+      return AppView;
+
+   });
+
+//views/app.js
+
+define(['jquery','backbone'],function($,Backbone){
+   var AppView = Backbone.View.extend({
+       initialize:function(){
+           console.log("App View Initialized");
+           this.render();
+       },
+       render:function(){
+           console.log("App View Rendering");
+           $("#placeholder").html("AppView Loaded");
+       }
+   })
+   return AppView;
+
+});
+
+//models/todo.js
+
+define(['jquery','backbone','models/todo'],function($,Backbone,TodoModel){
+   var AppView = Backbone.View.extend({
+       initialize:function(){
+           console.log("App View Initialized");
+           this.render();
+       },
+       render:function(){
+           console.log("App View Rendering");
+           $("#placeholder").html("AppView Loaded");
+
+           var todoModel = new TodoModel();
+           console.log("todomodel's content = "+todoModel.get("content"));
+       }
+   })
+   return AppView;
+
+});
+
+//views/app.js
+
+define(['jquery','backbone','models/todo'],function($,Backbone,TodoModel){
+   var AppView = Backbone.View.extend({
+       el:$("#placeholder"),
+       initialize:function(){
+           console.log("App View Initialized");
+           this.render();
+       },
+       render:function(){
+           console.log("App View Rendering");
+
+           this.el.html("AppView Loaded");
+           var todoModel = new TodoModel();
+           console.log("todomodel's content = "+todoModel.get("content"));
+       }
+   })
+   return AppView;
+
+});
+
+
+//views/todo.js
+define(['jquery','backbone'],function($,Backbone){
+
+    var TodoView = Backbone.View.extend({
+
+        initialize:function(){
+            console.log("TodoView initialized");
+            this.render();
+        },
+        render:function(){
+            $(this.el).html(this.options.model.get("content"));
+        }
+    });
+
+
+    return TodoView;
+
+});
+
+//views/app.js
+define(['jquery','backbone','models/todo','views/todo'],function($,Backbone,TodoModel,TodoView){
+   var AppView = Backbone.View.extend({
+       el:$("#placeholder"),
+       initialize:function(){
+           console.log("App View Initialized");
+           this.render();
+       },
+       render:function(){
+           console.log("App View Rendering");
+
+
+           var todoModel = new TodoModel();
+           console.log("todomodel's content = "+todoModel.get("content"));
+
+           var todoView = new TodoView({model:todoModel});
+           this.el.html(todoView.el);
+
+       }
+   })
+   return AppView;
+
+});
+
+========================================================================================================================
+
+3. Using Underscore for templates
+
+//templates/todo.html
+
+<div class="todo">
+    <%= model.get("content")%>
+</div>
+
+//css/app.css
+.todo{
+    padding:10px;
+    margin:10px;
+    border:1px solid red;
+    border-radius: 5px;
+    background:yellow;
+
+}
+
+
+//views/todo.js
+
+define(['jquery','underscore','backbone','text!templates/todo.html'],
+    function($,_,Backbone,TodoTemplate){
+
+    var TodoView = Backbone.View.extend({
+
+        template:_.template(TodoTemplate),
+
+        initialize:function(){
+            console.log("TodoView initialized");
+            this.render();
+        },
+        render:function(){
+
+            $(this.el).html(this.template({model:this.options.model}));
+        }
+    });
+
+
+    return TodoView;
+
+});
+
+========================================================================================================================
+
+4. Using Backbone Collections to read data from restful service
+
+//json/todos.json
+{
+    "result":[
+        {
+            "content":"Todo 1"
+        },
+        {
+            "content":"Todo 2"
+        },
+        {
+            "content":"Todo 3"
+        },
+        {
+            "content":"Todo 4"
+        }
+    ]
+
+
+}
+
+//collections/todo.js
+
+define(['backbone','models/todo'],function(Backbone,TodoModel){
+
+    var TodoCollection = Backbone.Collection.extend({
+            model:TodoModel,
+            url:'json/todos.json',
+            initialize:function(){
+                console.log("TodoCollection Initialized");
+            },
+            parse:function(data){
+                return data.result;
+            }
+        }
+    );
+
+    return TodoCollection;
+});
+
+//views/app.js  - Step 1
+define(['jquery','backbone','models/todo','views/todo','collections/todo'],
+    function($,Backbone,TodoModel,TodoView,TodoCollection){
+    var AppView = Backbone.View.extend({
+       el:$("#placeholder"),
+       initialize:function(){
+           console.log("App View Initialized");
+
+           this.todoCollection = new TodoCollection();
+           this.todoCollection.bind('all',this.render,this);
+           this.todoCollection.fetch();
+
+       },
+       render:function(){
+           console.log("Data Loaded");
+           var elem = this.el;
+           this.todoCollection.each(function(model){
+                console.log(model.get("content"));
+           });
+       }
+   })
+   return AppView;
+
+});
+
+//views/app.js - Step 2
+
+define(['jquery','backbone','models/todo','views/todo','collections/todo'],
+    function($,Backbone,TodoModel,TodoView,TodoCollection){
+    var AppView = Backbone.View.extend({
+       el:$("#placeholder"),
+       initialize:function(){
+           console.log("App View Initialized");
+
+           this.todoCollection = new TodoCollection();
+           this.todoCollection.bind('all',this.render,this);
+           this.todoCollection.fetch();
+
+       },
+       render:function(){
+           console.log("Data Loaded");
+           var elem = this.el;
+           elem.html("");
+           this.todoCollection.each(function(model){
+
+               var todoView = new TodoView({model:model});
+               elem.append(todoView.el);
+
+           });
+       }
+   })
+   return AppView;
+
+});
+
+========================================================================================================================
+
+5. Use Events and Routers
+
+//templates/app.html
+
+<div class="nav">
+    <span id="app-nav" class="tab">App</span>
+    <span id="aboutus-nav" class="tab">About us</span>
+</div>
+
+<div class="content">
+    <div id="app"></div>
+    <div id="aboutus"></div>
+</div>
+
+//templates/aboutus.html
+
+<div class="aboutus">
+<h1>About us</h1>
+
+    <p>
+        My name is Rohit Ghatol, I work for Synerzip Softech.
+    </p>
+    <p>
+        Synerzip Softech is a great place to work for!
+    </p>
+</div>
+
+//css/app.css
+.todo{
+    padding:10px;
+    margin:10px;
+    border:1px solid red;
+    border-radius: 5px;
+    background:yellow;
+
+}
+
+.tab {
+    padding: 10px;
+    border: 1px solid black;
+    border-radius: 10px 10px 0px 0px;
+    background: #777777;
+    color: white;
+}
+.aboutus {
+    padding: 10px;
+}
+.aboutus p {
+    font-size: 20pt;
+}
+
+
+//views/aboutus.js
+define(['jquery','underscore','backbone','text!templates/aboutus.html'],
+    function($,_,Backbone,AboutUsTemplate){
+        var AboutUsView = Backbone.View.extend({
+
+            template:_.template(AboutUsTemplate),
+
+            initialize:function(){
+                console.log("AboutUsView Initialized");
+                this.render();
+            },
+            render:function(){
+                console.log("AboutUsView Rendering");
+                $(this.el).html(this.template());
+            }
+        });
+
+        return AboutUsView;
+    }
+);
+
+//views/app.js - Step 1
+
+define(['jquery','underscore','backbone','models/todo','views/todo',
+    'views/aboutus','collections/todo','text!templates/app.html'],
+    function($,_,Backbone,TodoModel,TodoView,AboutUsView,TodoCollection,AppTemplate){
+    var AppView = Backbone.View.extend({
+       el:$("#placeholder"),
+       template:_.template(AppTemplate),
+       initialize:function(){
+            console.log("App View Initialized");
+            this.el.html(this.template());
+
+            var aboutusView = new AboutUsView();
+            this.el.find("#aboutus").html(aboutusView.el);
+
+            this.todoCollection = new TodoCollection();
+            this.todoCollection.bind('all',this.render,this);
+            this.todoCollection.fetch();
+
+       },
+       render:function(){
+           console.log("Data Loaded");
+           var elem = this.el.find("#app");
+           elem.html("");
+           this.todoCollection.each(function(model){
+
+               var todoView = new TodoView({model:model});
+               elem.append(todoView.el);
+
+           });
+       }
+   })
+   return AppView;
+
+})
+
+views/app.js - Step 2 - Change url to include hash #
+
+Add following
+
+events:{
+           'click .tab':'tabSelected'
+       },
+tabSelected:function(event){
+            console.log(event.target.id);
+            window.location.href='http://localhost/~rohit/Backbone-Demo-live/index.html#'+event.target.id;
+        }
+
+views/app.js - Step 3 - Add a Router
+
+//Create a router to handle change in Url
+var AppRouter = Backbone.Router.extend({
+    routes:{
+        "app-nav":"loadApp",
+        "aboutus-nav":"loadAboutus"
+    },
+    loadApp:function(){
+        console.log("Showing App");
+        $("#app").show();
+        $("#aboutus").hide();
+    },
+    loadAboutus:function(){
+        console.log("Showing Aboutus");
+        $("#app").hide();
+        $("#aboutus").show();
+
+    }
+});
+
+var router = new AppRouter();
+
+//Initialize the History Management
+Backbone.history.start();
+
+//Show App and Hide AboutUs
+$("#app").show();
+$("#aboutus").hide();
+
+========================================================================================================================
+
+6. Use Sass to create CSS
+
+//css/app.scss
+
+
+.todos{
+  .todo{
+    padding:10px;
+    margin:10px;
+    border:1px solid red;
+    border-radius: 5px;
+    background:yellow;
+
+  }
+
+  .tab {
+    padding: 10px;
+    border: 1px solid black;
+    border-radius: 10px 10px 0px 0px;
+    background: #777777;
+    color: white;
+  }
+  .aboutus {
+    padding: 10px;
+    p {
+      font-size: 20pt;
+    }
+  }
+}
+
+
+Run on command line
+$> sass --watch app.scss:app.css
+
+//app.scss - Step 2
+
+$color1:red;
+$color2:yellow;
+$color3:black;
+$color4:#777777;
+
+$unit1 : 10px;
+
+.todos{
+  .todo{
+    padding:$unit1;
+    margin:$unit1;
+    border:1px solid $color1;
+    border-radius: 5px;
+    background:$color2;
+
+  }
+
+  .tab {
+    padding: $unit1 / 2;
+    border: 1px solid $color3;
+    border-radius: 10px 10px 0px 0px;
+    background: $color4;
+    color: white;
+  }
+  .aboutus {
+    border:1px solid $color1;
+    background:$color2;
+    padding: $unit1;
+    p {
+      font-size: 20pt;
+    }
+  }
+}
+
+//css/rounded.scss
+@mixin rounded($radius:10px){
+  border-radius: $radius;
+  -moz-border-radius: $radius;
+  -webkit-border-radius: $radius;
+}
+
+
+//css/app.scss - Part 2 import
+
+@import "rounded";
+
+$color1:red;
+$color2:yellow;
+$color3:black;
+$color4:#777777;
+
+$unit1 : 10px;
+
+.todos{
+  .todo{
+    padding:$unit1;
+    margin:$unit1;
+    border:1px solid $color1;
+    @include rounded(5px);
+    background:$color2;
+
+  }
+
+  .tab {
+    padding: $unit1 / 2;
+    border: 1px solid $color3;
+    border-radius: 10px 10px 0px 0px;
+    background: $color4;
+    color: white;
+  }
+  .aboutus {
+    border:1px solid $color1;
+    @include rounded(20px);
+    background:$color2;
+    padding: $unit1;
+    p {
+      font-size: 20pt;
+    }
+  }
+}
+
+========================================================================================================================
+
+7. RequireJs Optimizer
+
+//js/app.build.js
+
+/**
+ * Created with JetBrains WebStorm.
+ * User: rohit
+ * Date: 7/20/12
+ * Time: 9:15 PM
+ * To change this template use File | Settings | File Templates.
+ */
+
+({
+    appDir:"../",
+    baseUrl:"js/",
+    dir:"../../Backbone-Demo-Opt",
+
+    paths:{
+
+        'jquery':'libs/jquery/jquery-min',
+        'underscore':'libs/underscore/underscore-min',
+        'backbone':'libs/backbone/backbone-optamd3-min',
+        'text':'libs/require/text'
+    },
+
+    modules:[
+        {
+            name:"main"
+        }
+    ]
+})
+
+Run the following command
+$>node ../../requirejs/r.js -o app.build.js
+
+Now Host the Backbone-Demo-Opt and load it in browser see the difference in network activities
+
+
